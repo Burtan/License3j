@@ -44,6 +44,24 @@ class LicenseTest {
     }
 
     @Test
+    @DisplayName("Creates a license and tests changing features after signing.")
+    void licenseChangePostSignature() throws NoSuchAlgorithmException,
+            IllegalBlockSizeException, InvalidKeyException, BadPaddingException, NoSuchPaddingException {
+
+        var keys = LicenseKeyPair.Create.from("RSA", 2048);
+
+        var license = new License();
+        license.add(Feature.Create.stringFeature("PRESIGN", "test"));
+        license.sign(keys.getPair().getPrivate(), "SHA-512");
+
+        Assertions.assertTrue(license.isOK(keys.getPair().getPublic()));
+
+        license.add(Feature.Create.stringFeature("POSTSIGN", "test"));
+
+        Assertions.assertFalse(license.isOK(keys.getPair().getPublic()));
+    }
+
+    @Test
     @DisplayName("Create a license with features serialize and restore then the features are the same")
     void licenseSerializeAndDeserialize() {
         final var sut = new License();
